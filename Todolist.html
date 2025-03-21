@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #fdf5c9; /* Yellow paper-like color */
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        input {
+            width: 70%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px;
+            cursor: pointer;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #ddd;
+            margin: 5px 0;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .done {
+            color: red;
+            text-decoration: line-through;
+        }
+        .delete {
+            background: red;
+            border: none;
+            color: white;
+            padding: 5px;
+            cursor: pointer;
+        }
+        .task-item {
+            cursor: pointer;
+        }
+        .confetti {
+            position: absolute;
+            top: 50%;
+            font-size: 2em;
+            color: red;
+            display: none;
+        }
+        .left-confetti {
+            left: -80px;
+        }
+        .right-confetti {
+            right: -80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>To-Do List</h2>
+        <input type="text" id="task" placeholder="Add a new task">
+        <button onclick="addTask()">Add</button>
+        <ul id="taskList"></ul>
+        <div id="leftConfetti" class="confetti left-confetti">🎉🌺🎊</div>
+        <div id="rightConfetti" class="confetti right-confetti">🎉🌺🎊</div>
+    </div>
+    
+    <audio id="popSound" src="https://www.fesliyanstudios.com/play-mp3/4386"></audio>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", loadTasks);
+        
+        function addTask() {
+            let taskInput = document.getElementById("task");
+            let task = taskInput.value.trim();
+            if (task === "") return;
+
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.push({ text: task, done: false });
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+
+            taskInput.value = "";
+            loadTasks();
+        }
+
+        function loadTasks() {
+            let taskList = document.getElementById("taskList");
+            taskList.innerHTML = "";
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            
+            tasks.forEach((task, index) => {
+                let li = document.createElement("li");
+                li.classList.add("task-item");
+                if (task.done) {
+                    li.classList.add("done");
+                }
+                li.innerHTML = `<span onclick='toggleTask(${index})'>${task.text}</span> <button class='delete' onclick='deleteTask(${index})'>X</button>`;
+                taskList.appendChild(li);
+            });
+        }
+
+        function deleteTask(index) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.splice(index, 1);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            loadTasks();
+        }
+
+        function toggleTask(index) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            if (!tasks[index].done) {
+                let popSound = document.getElementById("popSound");
+                popSound.play();
+                setTimeout(() => popSound.pause(), 3000); // Stop sound after 3 seconds
+                
+                let leftConfetti = document.getElementById("leftConfetti");
+                let rightConfetti = document.getElementById("rightConfetti");
+                leftConfetti.style.display = "block";
+                rightConfetti.style.display = "block";
+                setTimeout(() => {
+                    leftConfetti.style.display = "none";
+                    rightConfetti.style.display = "none";
+                }, 3000); // Hide after 3 seconds
+            }
+            tasks[index].done = !tasks[index].done;
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            loadTasks();
+        }
+    </script>
+</body>
+</html>
